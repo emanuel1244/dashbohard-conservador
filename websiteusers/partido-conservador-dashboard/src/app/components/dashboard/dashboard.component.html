@@ -282,6 +282,7 @@
               <th>Estado</th>
               <th>Compromiso</th>
               <th>Mesa</th>
+              <th>Lugar de Votación</th>
               <th>Celular</th>
               <th>Acciones</th>
             </tr>
@@ -312,6 +313,7 @@
               <td class="mesa-cell clickeable" (click)="abrirModalPersonasMesa(persona.mesa)" title="Ver personas de esta mesa">
                 {{persona.mesa}}
               </td>
+              <td>{{persona.lugarVotacion || '-'}}</td>
               <td>{{persona.celular}}</td>
               <td class="acciones-cell">
                 <button class="btn-icon" (click)="abrirModalPersona(persona)" title="Editar">
