@@ -1,0 +1,10 @@
+{
+  "name": "partido-conservador-lambda",
+  "version": "1.0.0",
+  "description": "Lambda functions para Dashboard Partido Conservador",
+  "main": "lambda-upload-excel-multipart.js",
+  "dependencies": {
+    "xlsx": "^0.18.5",
+    "aws-sdk": "^2.1400.0"
+  }
+}

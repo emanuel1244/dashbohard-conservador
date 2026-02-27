@@ -1,0 +1,200 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Partido Conservador Dashboard API
+
+Globals:
+  Function:
+    Timeout: 30
+    Runtime: nodejs18.x
+    Environment:
+      Variables:
+        TABLE_NAME: !Ref PersonasTable
+  Api:
+    Cors:
+      AllowMethods: "'GET,POST,PUT,DELETE,OPTIONS'"
+      AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+      AllowOrigin: "'*'"
+
+Resources:
+  # Tabla DynamoDB para Personas
+  PersonasTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: PartidoConservadorPersonas
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+        - AttributeName: cedula
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: CedulaIndex
+          KeySchema:
+            - AttributeName: cedula
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: 5
+            WriteCapacityUnits: 5
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+
+  # Tabla DynamoDB para Líderes
+  LideresTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: PartidoConservadorPersonasLideres
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+
+  # Función Lambda: Upload Excel
+  UploadExcelFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: partido-conservador-uploadExcel
+      CodeUri: .
+      Handler: lambda-upload-excel-multipart.handler
+      MemorySize: 512
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref PersonasTable
+      Events:
+        UploadExcel:
+          Type: Api
+          Properties:
+            Path: /api/upload-excel
+            Method: post
+
+  # Función Lambda: Get Personas
+  GetPersonasFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: partido-conservador-getPersonas
+      CodeUri: .
+      Handler: lambda-personas.getAll
+      MemorySize: 256
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref PersonasTable
+      Events:
+        GetPersonas:
+          Type: Api
+          Properties:
+            Path: /api/personas
+            Method: get
+
+  # Función Lambda: Get Estadísticas
+  GetEstadisticasFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: partido-conservador-getEstadisticas
+      CodeUri: .
+      Handler: lambda-personas.getEstadisticas
+      MemorySize: 256
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref PersonasTable
+        - DynamoDBReadPolicy:
+            TableName: !Ref LideresTable
+      Events:
+        GetEstadisticas:
+          Type: Api
+          Properties:
+            Path: /api/estadisticas
+            Method: get
+
+  # Función Lambda: Get Líderes
+  GetLideresFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: partido-conservador-getLideres
+      CodeUri: .
+      Handler: lambda-lideres.getAll
+      MemorySize: 256
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref LideresTable
+      Events:
+        GetLideres:
+          Type: Api
+          Properties:
+            Path: /api/lideres
+            Method: get
+
+  # Función Lambda: Create Líder
+  CreateLiderFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: partido-conservador-createLider
+      CodeUri: .
+      Handler: lambda-lideres.create
+      MemorySize: 256
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref LideresTable
+      Events:
+        CreateLider:
+          Type: Api
+          Properties:
+            Path: /api/lideres
+            Method: post
+
+  # Función Lambda: Update Líder
+  UpdateLiderFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: partido-conservador-updateLider
+      CodeUri: .
+      Handler: lambda-lideres.update
+      MemorySize: 256
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref LideresTable
+      Events:
+        UpdateLider:
+          Type: Api
+          Properties:
+            Path: /api/lideres/{id}
+            Method: put
+
+  # Función Lambda: Delete Líder
+  DeleteLiderFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: partido-conservador-deleteLider
+      CodeUri: .
+      Handler: lambda-lideres.delete
+      MemorySize: 256
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref LideresTable
+      Events:
+        DeleteLider:
+          Type: Api
+          Properties:
+            Path: /api/lideres/{id}
+            Method: delete
+
+Outputs:
+  ApiUrl:
+    Description: "URL de la API"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/api"
+  
+  PersonasTableName:
+    Description: "Nombre de la tabla de Personas"
+    Value: !Ref PersonasTable
+  
+  LideresTableName:
+    Description: "Nombre de la tabla de Líderes"
+    Value: !Ref LideresTable

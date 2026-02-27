@@ -1,0 +1,250 @@
+<div class="lider-panel-container">
+  <!-- Header -->
+  <header class="panel-header">
+    <div class="header-content">
+      <div class="logo-section">
+        <div class="logo-icon">PC</div>
+        <div>
+          <h1>Panel de Líder</h1>
+          <p>{{lider?.nombre}}</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="btn-perfil" (click)="abrirModalPerfil()">
+          👤 Mi Perfil
+        </button>
+        <button class="btn-logout" (click)="cerrarSesion()">
+          🚪 Salir
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Estadísticas -->
+  <div class="stats-section">
+    <div class="stat-card primary">
+      <div class="stat-icon">👥</div>
+      <div class="stat-info">
+        <h3>{{estadisticas.total}}</h3>
+        <p>Total Personas</p>
+      </div>
+    </div>
+
+    <div class="stat-card success">
+      <div class="stat-icon">✅</div>
+      <div class="stat-info">
+        <h3>{{estadisticas.activos}}</h3>
+        <p>Activos</p>
+      </div>
+    </div>
+
+    <div class="stat-card warning">
+      <div class="stat-icon">⚠️</div>
+      <div class="stat-info">
+        <h3>{{estadisticas.potenciales}}</h3>
+        <p>Potenciales</p>
+      </div>
+    </div>
+
+    <div class="stat-card info">
+      <div class="stat-icon">🔥</div>
+      <div class="stat-info">
+        <h3>{{estadisticas.altoCompromiso}}</h3>
+        <p>Alto Compromiso</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Información del Líder -->
+  <div class="info-lider">
+    <h2>📍 Mi Información</h2>
+    <div class="info-grid">
+      <div class="info-item">
+        <span class="label">Zona:</span>
+        <span class="value">{{lider?.zona}}</span>
+      </div>
+      <div class="info-item">
+        <span class="label">Celular:</span>
+        <span class="value">{{lider?.celular}}</span>
+      </div>
+      <div class="info-item">
+        <span class="label">Correo:</span>
+        <span class="value">{{lider?.correo}}</span>
+      </div>
+      <div class="info-item">
+        <span class="label">Cédula:</span>
+        <span class="value">{{lider?.cedula}}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtros y Acciones -->
+  <div class="acciones-section">
+    <h2>👥 Mis Personas Asignadas</h2>
+    <div class="filtros-container">
+      <input 
+        type="text" 
+        placeholder="🔍 Buscar..."
+        [(ngModel)]="busqueda"
+        (input)="filtrarPersonas()">
+      
+      <select [(ngModel)]="filtroEstado" (change)="filtrarPersonas()">
+        <option value="">Todos los estados</option>
+        <option value="Activo">✅ Activo</option>
+        <option value="Inactivo">❌ Inactivo</option>
+        <option value="Potencial">⚠️ Potencial</option>
+      </select>
+      
+      <select [(ngModel)]="filtroCompromiso" (change)="filtrarPersonas()">
+        <option value="">Todos los niveles</option>
+        <option value="Alto">🔥 Alto</option>
+        <option value="Medio">⚡ Medio</option>
+        <option value="Bajo">💤 Bajo</option>
+      </select>
+      
+      <button class="btn-clear" (click)="limpiarFiltros()">
+        🔄 Limpiar
+      </button>
+      
+      <button class="btn-export" (click)="exportarMisPersonas()">
+        📥 Exportar
+      </button>
+    </div>
+
+    <div class="resultados-info">
+      <p>Mostrando {{personasFiltradas.length}} de {{personas.length}} personas</p>
+    </div>
+  </div>
+
+  <!-- Tabla de Personas -->
+  <div class="table-container">
+    <table class="personas-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Nombre</th>
+          <th>Cédula</th>
+          <th>Celular</th>
+          <th>Estado</th>
+          <th>Compromiso</th>
+          <th>Mesa</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let persona of personasFiltradas; let i = index">
+          <td>{{i + 1}}</td>
+          <td class="nombre-cell">{{persona.nombre}}</td>
+          <td>{{persona.cedula}}</td>
+          <td>{{persona.celular}}</td>
+          <td>
+            <span [class]="'badge badge-' + (persona.estado || 'Activo').toLowerCase()">
+              {{persona.estado || 'Activo'}}
+            </span>
+          </td>
+          <td>
+            <span [class]="'badge badge-compromiso-' + (persona.nivelCompromiso || 'Medio').toLowerCase()">
+              {{persona.nivelCompromiso || 'Medio'}}
+            </span>
+          </td>
+          <td>{{persona.mesa}}</td>
+          <td>
+            <button class="btn-icon" (click)="abrirModalPersona(persona)">
+              ✏️
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div *ngIf="personasFiltradas.length === 0" class="empty-state">
+      <p>📭 No se encontraron personas</p>
+      <button class="btn-secondary" (click)="limpiarFiltros()">Limpiar filtros</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Editar Persona -->
+<div *ngIf="mostrarModalPersona" class="modal-overlay" (click)="cerrarModalPersona()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>✏️ Editar Persona</h2>
+      <button class="btn-close" (click)="cerrarModalPersona()">✕</button>
+    </div>
+    
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Estado</label>
+        <select [(ngModel)]="personaForm.estado">
+          <option value="Activo">✅ Activo</option>
+          <option value="Inactivo">❌ Inactivo</option>
+          <option value="Potencial">⚠️ Potencial</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label>Nivel de Compromiso</label>
+        <select [(ngModel)]="personaForm.nivelCompromiso">
+          <option value="Alto">🔥 Alto</option>
+          <option value="Medio">⚡ Medio</option>
+          <option value="Bajo">💤 Bajo</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label>Notas / Observaciones</label>
+        <textarea 
+          [(ngModel)]="personaForm.notas" 
+          placeholder="Agrega observaciones sobre esta persona..."
+          rows="4"></textarea>
+      </div>
+    </div>
+    
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="cerrarModalPersona()">Cancelar</button>
+      <button class="btn-primary" (click)="guardarPersona()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Editar Perfil -->
+<div *ngIf="mostrarModalPerfil" class="modal-overlay" (click)="cerrarModalPerfil()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>👤 Mi Perfil</h2>
+      <button class="btn-close" (click)="cerrarModalPerfil()">✕</button>
+    </div>
+    
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Nombre Completo</label>
+        <input type="text" [(ngModel)]="perfilForm.nombre" readonly>
+      </div>
+      
+      <div class="form-group">
+        <label>Cédula</label>
+        <input type="text" [(ngModel)]="perfilForm.cedula" readonly>
+      </div>
+      
+      <div class="form-group">
+        <label>Celular</label>
+        <input type="text" [(ngModel)]="perfilForm.celular">
+      </div>
+      
+      <div class="form-group">
+        <label>Correo Electrónico</label>
+        <input type="email" [(ngModel)]="perfilForm.correo">
+      </div>
+      
+      <div class="form-group">
+        <label>Zona Asignada</label>
+        <input type="text" [(ngModel)]="perfilForm.zona" readonly>
+      </div>
+    </div>
+    
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="cerrarModalPerfil()">Cancelar</button>
+      <button class="btn-primary" (click)="guardarPerfil()">Guardar Cambios</button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,8 @@
+{
+  "httpMethod": "OPTIONS",
+  "headers": {
+    "content-type": "multipart/form-data; boundary=test"
+  },
+  "body": "",
+  "isBase64Encoded": false
+}

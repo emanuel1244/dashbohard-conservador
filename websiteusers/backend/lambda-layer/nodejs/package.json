@@ -1,0 +1,8 @@
+{
+  "name": "lambda-dependencies-layer",
+  "version": "1.0.0",
+  "description": "Dependencies for Excel upload Lambda",
+  "dependencies": {
+    "xlsx": "^0.18.5"
+  }
+}

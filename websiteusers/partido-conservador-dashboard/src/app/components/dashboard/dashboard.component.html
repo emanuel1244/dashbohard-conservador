@@ -1,0 +1,909 @@
+<div class="dashboard-container">
+  <!-- Header -->
+  <header class="header">
+    <div class="logo-section">
+      <div class="logo">
+        <div class="logo-icon">PC</div>
+        <div class="logo-text">
+          <h1>Partido Conservador</h1>
+          <p>Sistema de Gestión Electoral</p>
+        </div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <div class="user-info">
+        <span class="user-name">Administrador</span>
+        <div class="user-avatar">AD</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navigation -->
+  <nav class="navigation">
+    <button 
+      class="nav-btn" 
+      [class.active]="vistaActual === 'dashboard'"
+      (click)="cambiarVista('dashboard')">
+      <span class="icon">📊</span>
+      Dashboard
+    </button>
+    <button 
+      class="nav-btn" 
+      [class.active]="vistaActual === 'personas'"
+      (click)="cambiarVista('personas')">
+      <span class="icon">👥</span>
+      Personas ({{estadisticas.totalPersonas}})
+    </button>
+    <button 
+      class="nav-btn" 
+      [class.active]="vistaActual === 'lideres'"
+      (click)="cambiarVista('lideres')">
+      <span class="icon">⭐</span>
+      Líderes ({{estadisticas.totalLideres}})
+    </button>
+    <button 
+      class="nav-btn" 
+      [class.active]="vistaActual === 'mesas'"
+      (click)="cambiarVista('mesas')">
+      <span class="icon">🗳️</span>
+      Mesas ({{Object.keys(estadisticas.porMesa).length}})
+    </button>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    
+    <!-- Vista Dashboard -->
+    <div *ngIf="vistaActual === 'dashboard'" class="vista-dashboard">
+      
+      <!-- Stats Cards -->
+      <div class="stats-grid">
+        <div class="stat-card primary">
+          <div class="stat-icon">👥</div>
+          <div class="stat-info">
+            <h3>{{estadisticas.totalPersonas}}</h3>
+            <p>Total Personas</p>
+          </div>
+        </div>
+        
+        <div class="stat-card success">
+          <div class="stat-icon">⭐</div>
+          <div class="stat-info">
+            <h3>{{estadisticas.totalLideres}}</h3>
+            <p>Líderes Activos</p>
+          </div>
+        </div>
+        
+        <div class="stat-card warning">
+          <div class="stat-icon">🗳️</div>
+          <div class="stat-info">
+            <h3>{{Object.keys(estadisticas.porMesa).length}}</h3>
+            <p>Mesas de Votación</p>
+          </div>
+        </div>
+        
+        <div class="stat-card info">
+          <div class="stat-icon">📍</div>
+          <div class="stat-info">
+            <h3>{{Object.keys(estadisticas.porLugarVotacion).length}}</h3>
+            <p>Lugares de Votación</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Upload Section -->
+      <div class="upload-section">
+        <div class="upload-card">
+          <h2>📤 Cargar Datos desde Excel</h2>
+          <p class="upload-description">
+            Sube tu archivo Excel con la información de votantes. El sistema validará automáticamente duplicados y datos incompletos.
+          </p>
+          
+          <div class="upload-area">
+            <input 
+              type="file" 
+              id="fileInput" 
+              accept=".xlsx,.xls" 
+              (change)="onFileSelected($event)"
+              style="display: none">
+            
+            <label for="fileInput" class="file-label">
+              <span class="upload-icon">📁</span>
+              <span>{{archivoSeleccionado ? archivoSeleccionado.name : 'Seleccionar archivo Excel'}}</span>
+            </label>
+            
+            <button 
+              class="btn-upload" 
+              (click)="subirArchivo()"
+              [disabled]="!archivoSeleccionado || cargando">
+              {{cargando ? '⏳ Procesando...' : '⬆️ Subir Archivo'}}
+            </button>
+          </div>
+
+          <div *ngIf="mensajeUpload" class="upload-message" [class.success]="!mensajeUpload.includes('Error')">
+            {{mensajeUpload}}
+          </div>
+
+          <!-- Resumen de Estadísticas -->
+          <div *ngIf="estadisticasUpload" class="upload-summary">
+            <div class="summary-stats">
+              <div class="stat success" *ngIf="estadisticasUpload.agregadas > 0">
+                <span class="stat-icon">✓</span>
+                <span class="stat-value">{{estadisticasUpload.agregadas}}</span>
+                <span class="stat-label">agregadas</span>
+              </div>
+              
+              <div class="stat warning" *ngIf="estadisticasUpload.duplicados > 0">
+                <span class="stat-icon">⚠</span>
+                <span class="stat-value">{{estadisticasUpload.duplicados}}</span>
+                <span class="stat-label">duplicados</span>
+              </div>
+              
+              <div class="stat error" *ngIf="estadisticasUpload.errores > 0">
+                <span class="stat-icon">✗</span>
+                <span class="stat-value">{{estadisticasUpload.errores}}</span>
+                <span class="stat-label">errores</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sección de Duplicados Mejorada -->
+          <div *ngIf="duplicadosEncontrados.length > 0" class="duplicados-section">
+            <!-- Sección expandible de duplicados -->
+            <div class="duplicados-header" (click)="toggleDuplicados()">
+              <span class="warning-icon">⚠️</span>
+              <h4>Duplicados Encontrados ({{duplicadosEncontrados.length}})</h4>
+              <span class="expand-icon">{{mostrandoDuplicados ? '▼' : '▶'}}</span>
+            </div>
+            
+            <div *ngIf="mostrandoDuplicados" class="duplicados-content">
+              <div class="duplicados-list">
+                <div *ngFor="let dup of duplicadosParaMostrar" class="duplicado-item">
+                  <span class="fila-badge">Fila {{dup.fila}}</span>
+                  <span class="nombre">{{dup.persona.nombre}}</span>
+                  <span class="cedula">{{dup.persona.cedula}}</span>
+                </div>
+              </div>
+              
+              <button *ngIf="duplicadosEncontrados.length > 5 && duplicadosVisibles === 5" 
+                      class="btn-show-more"
+                      (click)="mostrarTodosDuplicados()">
+                +{{duplicadosEncontrados.length - 5}} más...
+              </button>
+              
+              <!-- Botón de descarga -->
+              <button class="btn-download-duplicates"
+                      (click)="descargarExcelDuplicados()"
+                      [disabled]="isExportingDuplicates"
+                      title="Descargar archivo Excel con los registros duplicados">
+                <span class="icon">📊</span>
+                <span *ngIf="!isExportingDuplicates">Descargar Excel con Duplicados</span>
+                <span *ngIf="isExportingDuplicates">
+                  <span class="spinner">⏳</span> Generando archivo...
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Top Mesas -->
+      <div class="top-mesas">
+        <h2>🏆 Top 5 Mesas con Más Personas</h2>
+        <div class="mesas-list">
+          <div *ngFor="let mesa of getTopMesas(); let i = index" 
+               class="mesa-item clickeable" 
+               (click)="abrirModalPersonasMesa(mesa.mesa)">
+            <span class="mesa-rank">#{{i + 1}}</span>
+            <span class="mesa-nombre">Mesa {{mesa.mesa}}</span>
+            <span class="mesa-cantidad">{{mesa.cantidad}} personas</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Vista Personas -->
+    <div *ngIf="vistaActual === 'personas'" class="vista-personas">
+      <div class="personas-header">
+        <h2>👥 Gestión de Personas</h2>
+        <div class="header-actions-group">
+          <button class="btn-primary" (click)="abrirModalPersona()">
+            ➕ Agregar Persona
+          </button>
+          <button class="btn-export" (click)="exportarPersonas()">
+            📊 Exportar a Excel
+          </button>
+        </div>
+      </div>
+
+      <!-- Filtros Avanzados -->
+      <div class="filtros-container">
+        <div class="filtro-item">
+          <input 
+            type="text" 
+            placeholder="🔍 Buscar por nombre, cédula o celular..."
+            [(ngModel)]="busqueda"
+            (input)="filtrarPersonas()">
+        </div>
+        
+        <div class="filtro-item">
+          <select [(ngModel)]="filtroLider" (change)="filtrarPersonas()">
+            <option value="">Todos los líderes</option>
+            <option *ngFor="let lider of lideres" [value]="lider.id">
+              {{lider.nombre}}
+            </option>
+          </select>
+        </div>
+        
+        <div class="filtro-item">
+          <select [(ngModel)]="filtroEstado" (change)="filtrarPersonas()">
+            <option value="">Todos los estados</option>
+            <option value="Activo">✅ Activo</option>
+            <option value="Inactivo">❌ Inactivo</option>
+            <option value="Potencial">⚠️ Potencial</option>
+          </select>
+        </div>
+        
+        <div class="filtro-item">
+          <select [(ngModel)]="filtroCompromiso" (change)="filtrarPersonas()">
+            <option value="">Todos los niveles</option>
+            <option value="Alto">🔥 Alto</option>
+            <option value="Medio">⚡ Medio</option>
+            <option value="Bajo">💤 Bajo</option>
+          </select>
+        </div>
+        
+        <div class="filtro-item">
+          <select [(ngModel)]="filtroZona" (change)="filtrarPersonas()">
+            <option value="">Todas las zonas</option>
+            <option *ngFor="let zona of getZonasUnicas()" [value]="zona">
+              {{zona}}
+            </option>
+          </select>
+        </div>
+        
+        <button class="btn-clear-filters" (click)="limpiarFiltros()">
+          🔄 Limpiar
+        </button>
+      </div>
+
+      <div class="resultados-info">
+        <p>Mostrando {{personasFiltradas.length}} de {{personas.length}} personas</p>
+      </div>
+
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Nombre</th>
+              <th>Cédula</th>
+              <th>Líder</th>
+              <th>Estado</th>
+              <th>Compromiso</th>
+              <th>Mesa</th>
+              <th>Celular</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let persona of personasFiltradas; let i = index">
+              <td>{{i + 1}}</td>
+              <td class="nombre-cell">{{persona.nombre}}</td>
+              <td>{{persona.cedula}}</td>
+              <td>
+                <span *ngIf="persona.liderNombre" class="lider-badge">
+                  {{persona.liderNombre}}
+                </span>
+                <span *ngIf="!persona.liderNombre" class="sin-lider">
+                  Sin asignar
+                </span>
+              </td>
+              <td>
+                <span [class]="'badge badge-' + (persona.estado || 'Activo').toLowerCase()">
+                  {{persona.estado || 'Activo'}}
+                </span>
+              </td>
+              <td>
+                <span [class]="'badge badge-compromiso-' + (persona.nivelCompromiso || 'Medio').toLowerCase()">
+                  {{persona.nivelCompromiso || 'Medio'}}
+                </span>
+              </td>
+              <td class="mesa-cell clickeable" (click)="abrirModalPersonasMesa(persona.mesa)" title="Ver personas de esta mesa">
+                {{persona.mesa}}
+              </td>
+              <td>{{persona.celular}}</td>
+              <td class="acciones-cell">
+                <button class="btn-icon" (click)="abrirModalPersona(persona)" title="Editar">
+                  ✏️
+                </button>
+                <button class="btn-icon btn-danger" (click)="eliminarPersona(persona.id)" title="Eliminar">
+                  🗑️
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <div *ngIf="personasFiltradas.length === 0" class="empty-state">
+          <p>📭 No se encontraron personas con los filtros aplicados</p>
+          <button class="btn-secondary" (click)="limpiarFiltros()">Limpiar filtros</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Vista Líderes -->
+    <div *ngIf="vistaActual === 'lideres'" class="vista-lideres">
+      <div class="lideres-header">
+        <div class="header-content">
+          <h2>⭐ Gestión de Líderes</h2>
+          <p class="subtitle">{{lideres.length}} {{lideres.length === 1 ? 'líder registrado' : 'líderes registrados'}}</p>
+        </div>
+        <button class="btn-primary" (click)="abrirModalLider()">
+          <span class="btn-icon-text">➕</span> Agregar Líder
+        </button>
+      </div>
+
+      <div class="lideres-grid">
+        <div *ngFor="let lider of lideres" class="lider-card-modern">
+          <div class="card-header">
+            <div class="lider-avatar-modern">
+              <span class="avatar-letter">{{lider.nombre ? lider.nombre.charAt(0).toUpperCase() : '?'}}</span>
+            </div>
+            <div class="lider-title">
+              <h3>{{lider.nombre || 'Sin nombre'}}</h3>
+              <span class="lider-id">ID: {{lider.cedula || 'N/A'}}</span>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <div class="info-row">
+              <span class="info-icon">📍</span>
+              <div class="info-content">
+                <span class="info-label">Zona</span>
+                <span class="info-value">{{lider.zona || 'No asignada'}}</span>
+              </div>
+            </div>
+
+            <div class="info-row">
+              <span class="info-icon">📱</span>
+              <div class="info-content">
+                <span class="info-label">Celular</span>
+                <span class="info-value">{{lider.celular || 'No registrado'}}</span>
+              </div>
+            </div>
+
+            <div class="info-row">
+              <span class="info-icon">✉️</span>
+              <div class="info-content">
+                <span class="info-label">Correo</span>
+                <span class="info-value">{{lider.correo || 'No registrado'}}</span>
+              </div>
+            </div>
+
+            <div class="stats-container">
+              <div class="stat-item">
+                <span class="stat-number">{{getPersonasPorLider(lider.id).length}}</span>
+                <span class="stat-label">Personas</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-number">{{getEstadisticasLider(lider.id).activos}}</span>
+                <span class="stat-label">Activos</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-number">{{getEstadisticasLider(lider.id).altoCompromiso}}</span>
+                <span class="stat-label">Alto Compromiso</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="card-footer">
+            <button class="btn-action btn-export" (click)="exportarPorLider(lider.id); $event.stopPropagation()" title="Exportar a Excel">
+              <span class="action-icon">📊</span>
+              <span class="action-text">Excel</span>
+            </button>
+            <button class="btn-action btn-edit" (click)="abrirModalLider(lider); $event.stopPropagation()" title="Editar líder">
+              <span class="action-icon">✏️</span>
+              <span class="action-text">Editar</span>
+            </button>
+            <button class="btn-action btn-delete" (click)="eliminarLider(lider.id); $event.stopPropagation()" title="Eliminar líder">
+              <span class="action-icon">🗑️</span>
+              <span class="action-text">Eliminar</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="lideres.length === 0" class="empty-state">
+        <div class="empty-icon">⭐</div>
+        <h3>No hay líderes registrados</h3>
+        <p>Comienza agregando tu primer líder al sistema</p>
+        <button class="btn-primary" (click)="abrirModalLider()">
+          <span class="btn-icon-text">➕</span> Agregar Primer Líder
+        </button>
+      </div>
+    </div>
+
+    <!-- Vista Mesas -->
+    <div *ngIf="vistaActual === 'mesas'" class="vista-mesas">
+      <div class="mesas-header">
+        <h2>🗳️ Mesas por Institución</h2>
+        <p class="subtitle">{{Object.keys(estadisticas.porMesa).length}} mesas en {{institucionesAgrupadas.length}} instituciones</p>
+      </div>
+
+      <!-- Grid de Instituciones -->
+      <div class="instituciones-grid">
+        <div class="institucion-card" *ngFor="let inst of institucionesAgrupadas" (click)="abrirModalPersonasMesa(inst.nombre)">
+          <div class="institucion-header">
+            <h3>🏫 {{inst.nombre}}</h3>
+          </div>
+          
+          <div class="institucion-stats">
+            <div class="stat-item">
+              <span class="stat-icon">👥</span>
+              <div class="stat-content">
+                <strong>{{inst.totalPersonas}}</strong>
+                <span>{{inst.totalPersonas === 1 ? 'Persona' : 'Personas'}}</span>
+              </div>
+            </div>
+            
+            <div class="stat-item">
+              <span class="stat-icon">🗳️</span>
+              <div class="stat-content">
+                <strong>{{inst.mesas.length}}</strong>
+                <span>{{inst.mesas.length === 1 ? 'Mesa' : 'Mesas'}}</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="mesas-preview">
+            <span class="mesas-label">Mesas:</span>
+            <div class="mesas-tags">
+              <span class="mesa-tag" *ngFor="let mesa of inst.mesas.slice(0, 5)">
+                {{mesa.mesa}}
+              </span>
+              <span class="mesa-tag more" *ngIf="inst.mesas.length > 5">
+                +{{inst.mesas.length - 5}}
+              </span>
+            </div>
+          </div>
+          
+          <div class="institucion-direccion" *ngIf="inst.direccion">
+            <span class="direccion-icon">📍</span>
+            <span class="direccion-text">{{inst.direccion}}</span>
+          </div>
+          
+          <button class="btn-ver-detalle">
+            Ver Detalle →
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Modal Líder -->
+<div *ngIf="mostrarModalLider" class="modal-overlay" (click)="cerrarModalLider()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>{{liderEditando ? '✏️ Editar Líder' : '➕ Nuevo Líder'}}</h2>
+      <button class="btn-close" (click)="cerrarModalLider()">✕</button>
+    </div>
+    
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Nombre Completo</label>
+        <input type="text" [(ngModel)]="nuevoLider.nombre" placeholder="Nombre y apellidos">
+      </div>
+      
+      <div class="form-group">
+        <label>Cédula</label>
+        <input type="text" [(ngModel)]="nuevoLider.cedula" placeholder="Número de cédula">
+      </div>
+      
+      <div class="form-group">
+        <label>Celular</label>
+        <input type="text" [(ngModel)]="nuevoLider.celular" placeholder="Número de celular">
+      </div>
+      
+      <div class="form-group">
+        <label>Correo Electrónico</label>
+        <input type="email" [(ngModel)]="nuevoLider.correo" placeholder="correo@ejemplo.com">
+      </div>
+      
+      <div class="form-group">
+        <label>Zona Asignada</label>
+        <input type="text" [(ngModel)]="nuevoLider.zona" placeholder="Zona o sector">
+      </div>
+    </div>
+    
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="cerrarModalLider()">Cancelar</button>
+      <button class="btn-primary" (click)="guardarLider()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Persona -->
+<div *ngIf="mostrarModalPersona" class="modal-overlay" (click)="cerrarModalPersona()">
+  <div class="modal-content modal-large" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>{{personaEditando ? '✏️ Editar Persona' : '➕ Nueva Persona'}}</h2>
+      <button class="btn-close" (click)="cerrarModalPersona()" [disabled]="isSubmitting">✕</button>
+    </div>
+    
+    <div class="modal-body">
+      <!-- Información Básica -->
+      <div class="form-section">
+        <h3 class="section-title">📋 Información Básica</h3>
+        
+        <div class="form-row">
+          <div class="form-group" [class.has-error]="validationErrors['nombre']">
+            <label>Nombre Completo *</label>
+            <input 
+              type="text" 
+              [(ngModel)]="personaForm.nombre" 
+              placeholder="Nombre y apellidos"
+              [disabled]="isSubmitting">
+            <span *ngIf="validationErrors['nombre']" class="error-message">
+              {{validationErrors['nombre']}}
+            </span>
+          </div>
+          
+          <div class="form-group" [class.has-error]="validationErrors['cedula']">
+            <label>Cédula *</label>
+            <input 
+              type="text" 
+              [(ngModel)]="personaForm.cedula" 
+              placeholder="Número de cédula"
+              [disabled]="isSubmitting">
+            <span *ngIf="validationErrors['cedula']" class="error-message">
+              {{validationErrors['cedula']}}
+            </span>
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group" [class.has-error]="validationErrors['celular']">
+            <label>Celular</label>
+            <input 
+              type="text" 
+              [(ngModel)]="personaForm.celular" 
+              placeholder="3001234567"
+              [disabled]="isSubmitting">
+            <span *ngIf="validationErrors['celular']" class="error-message">
+              {{validationErrors['celular']}}
+            </span>
+          </div>
+          
+          <div class="form-group" [class.has-error]="validationErrors['correo']">
+            <label>Correo Electrónico</label>
+            <input 
+              type="email" 
+              [(ngModel)]="personaForm.correo" 
+              placeholder="correo@ejemplo.com"
+              [disabled]="isSubmitting">
+            <span *ngIf="validationErrors['correo']" class="error-message">
+              {{validationErrors['correo']}}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Asignación y Categorización -->
+      <div class="form-section">
+        <h3 class="section-title">⭐ Asignación y Categorización</h3>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label>Asignar Líder</label>
+            <select [(ngModel)]="personaForm.liderId" [disabled]="isSubmitting">
+              <option value="">Sin líder asignado</option>
+              <option *ngFor="let lider of lideres" [value]="lider.id">
+                {{lider.nombre}} - {{lider.zona}}
+              </option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label>Zona</label>
+            <input 
+              type="text" 
+              [(ngModel)]="personaForm.zona" 
+              placeholder="Zona o sector"
+              [disabled]="isSubmitting">
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label>Estado</label>
+            <select [(ngModel)]="personaForm.estado" [disabled]="isSubmitting">
+              <option value="Activo">✅ Activo</option>
+              <option value="Inactivo">❌ Inactivo</option>
+              <option value="Potencial">⚠️ Potencial</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label>Nivel de Compromiso</label>
+            <select [(ngModel)]="personaForm.nivelCompromiso" [disabled]="isSubmitting">
+              <option value="Alto">🔥 Alto</option>
+              <option value="Medio">⚡ Medio</option>
+              <option value="Bajo">💤 Bajo</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Información de Votación -->
+      <div class="form-section">
+        <h3 class="section-title">🗳️ Información de Votación</h3>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label>Mesa</label>
+            <input 
+              type="text" 
+              [(ngModel)]="personaForm.mesa" 
+              placeholder="Número de mesa"
+              [disabled]="isSubmitting">
+          </div>
+          
+          <div class="form-group">
+            <label>Lugar de Votación</label>
+            <input 
+              type="text" 
+              [(ngModel)]="personaForm.lugarVotacion" 
+              placeholder="IE MARIA AUXILIADORA"
+              [disabled]="isSubmitting">
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label>Dirección del Lugar de Votación</label>
+          <input 
+            type="text" 
+            [(ngModel)]="personaForm.direccionVotacion" 
+            placeholder="Dirección del lugar de votación"
+            [disabled]="isSubmitting">
+        </div>
+        
+        <div class="form-group">
+          <label>Dirección de Residencia</label>
+          <input 
+            type="text" 
+            [(ngModel)]="personaForm.direccion" 
+            placeholder="Dirección completa"
+            [disabled]="isSubmitting">
+        </div>
+      </div>
+
+      <!-- Notas -->
+      <div class="form-section">
+        <h3 class="section-title">📝 Notas y Observaciones</h3>
+        
+        <div class="form-group" [class.has-error]="validationErrors['notas']">
+          <label>Notas (máximo 1000 caracteres)</label>
+          <textarea 
+            [(ngModel)]="personaForm.notas" 
+            placeholder="Observaciones, comentarios o notas adicionales..."
+            rows="3"
+            maxlength="1000"
+            [disabled]="isSubmitting"></textarea>
+          <div class="char-counter">
+            {{(personaForm.notas || '').length}} / 1000 caracteres
+          </div>
+          <span *ngIf="validationErrors['notas']" class="error-message">
+            {{validationErrors['notas']}}
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="cerrarModalPersona()" [disabled]="isSubmitting">
+        Cancelar
+      </button>
+      <button class="btn-primary" (click)="guardarPersona()" [disabled]="isSubmitting">
+        <span *ngIf="!isSubmitting">💾 Guardar</span>
+        <span *ngIf="isSubmitting">⏳ Guardando...</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<!-- Modal Personas por Institución -->
+<div class="modal-overlay" *ngIf="modalPersonasMesa" (click)="cerrarModalPersonasMesa()">
+  <div class="modal-content modal-personas-mesa" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>🏫 {{institucionSeleccionada}}</h2>
+      <button class="btn-close" (click)="cerrarModalPersonasMesa()">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <!-- Información de la institución -->
+      <div class="institucion-info" *ngIf="!cargandoPersonasMesa && !errorPersonasMesa">
+        <div class="info-grid">
+          <div class="info-card">
+            <span class="info-icon">👥</span>
+            <div class="info-content">
+              <strong>{{personasMesaFiltradas.length}}</strong>
+              <span>{{personasMesaFiltradas.length === 1 ? 'Persona' : 'Personas'}}</span>
+            </div>
+          </div>
+          <div class="info-card">
+            <span class="info-icon">🗳️</span>
+            <div class="info-content">
+              <strong>{{mesasEnInstitucion.length}}</strong>
+              <span>{{mesasEnInstitucion.length === 1 ? 'Mesa' : 'Mesas'}}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Resumen de mesas -->
+      <div class="mesas-resumen" *ngIf="!cargandoPersonasMesa && !errorPersonasMesa && mesasEnInstitucion.length > 0">
+        <h3>📋 Mesas en esta institución:</h3>
+        <div class="mesas-chips">
+          <div class="mesa-chip" *ngFor="let mesa of mesasEnInstitucion">
+            <span class="mesa-numero">Mesa {{mesa.mesa}}</span>
+            <span class="mesa-badge">{{mesa.cantidad}}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Buscador -->
+      <div class="search-box" *ngIf="personasMesaActual.length > 5 && !cargandoPersonasMesa && !errorPersonasMesa">
+        <input 
+          type="text" 
+          [(ngModel)]="searchTermMesa" 
+          placeholder="🔍 Buscar por nombre, cédula, mesa o líder..."
+          class="search-input"
+        />
+      </div>
+
+      <!-- Loading -->
+      <div class="loading-state" *ngIf="cargandoPersonasMesa">
+        <div class="spinner"></div>
+        <p>Cargando personas de la institución...</p>
+      </div>
+
+      <!-- Error -->
+      <div class="error-state" *ngIf="errorPersonasMesa && !cargandoPersonasMesa">
+        <p class="error-message">❌ {{errorPersonasMesa}}</p>
+        <button class="btn-primary" (click)="reintentarCargarPersonasMesa()">
+          🔄 Reintentar
+        </button>
+      </div>
+
+      <!-- Lista vacía -->
+      <div class="empty-state" *ngIf="!cargandoPersonasMesa && !errorPersonasMesa && personasMesaFiltradas.length === 0 && personasMesaActual.length === 0">
+        <p>📭 No hay personas asignadas a esta institución</p>
+      </div>
+
+      <!-- Sin resultados de búsqueda -->
+      <div class="empty-state" *ngIf="!cargandoPersonasMesa && !errorPersonasMesa && personasMesaFiltradas.length === 0 && personasMesaActual.length > 0">
+        <p>🔍 No se encontraron resultados para "{{searchTermMesa}}"</p>
+      </div>
+
+      <!-- Lista de personas -->
+      <div class="personas-list" *ngIf="!cargandoPersonasMesa && !errorPersonasMesa && personasMesaFiltradas.length > 0">
+        <div class="persona-card" *ngFor="let persona of personasMesaFiltradas">
+          <div class="persona-header">
+            <h3>👤 {{persona.nombre || 'Sin nombre'}}</h3>
+            <span class="mesa-badge-card">Mesa {{persona.mesa}}</span>
+          </div>
+          
+          <div class="persona-info">
+            <div class="info-row">
+              <span class="info-label">📋 Cédula:</span>
+              <span class="info-value">{{persona.cedula || 'No registrada'}}</span>
+            </div>
+            
+            <div class="info-row">
+              <span class="info-label">🗳️ Mesa:</span>
+              <span class="info-value">{{persona.mesa || 'No asignada'}}</span>
+            </div>
+            
+            <div class="info-row" *ngIf="persona.direccionVotacion">
+              <span class="info-label">📍 Dirección:</span>
+              <span class="info-value">{{persona.direccionVotacion}}</span>
+            </div>
+            
+            <div class="info-row">
+              <span class="info-label">👔 Líder:</span>
+              <span class="info-value" [class.text-muted]="!persona.liderNombre">
+                {{persona.liderNombre || 'Sin líder asignado'}}
+              </span>
+            </div>
+            
+            <div class="info-row" *ngIf="persona.celular || persona.correo">
+              <span class="info-label">📞 Contacto:</span>
+              <span class="info-value">
+                <span *ngIf="persona.celular">📱 {{persona.celular}}</span>
+                <span *ngIf="persona.celular && persona.correo"> | </span>
+                <span *ngIf="persona.correo">✉️ {{persona.correo}}</span>
+              </span>
+            </div>
+          </div>
+          
+          <div class="persona-actions">
+          </div>
+        </div>
+      </div>
+      
+      <!-- Sin botones de acción adicionales -->
+    </div>
+  </div>
+</div>
+
+
+<!-- Sistema de Notificaciones Toast -->
+<div class="toast-container">
+  <div *ngFor="let toast of toasts" 
+       class="toast toast-{{toast.type}}">
+    <div class="toast-icon">
+      <span *ngIf="toast.type === 'success'">✓</span>
+      <span *ngIf="toast.type === 'error'">✕</span>
+      <span *ngIf="toast.type === 'warning'">⚠</span>
+      <span *ngIf="toast.type === 'info'">ℹ</span>
+    </div>
+    <div class="toast-content">
+      <p class="toast-message">{{toast.message}}</p>
+    </div>
+    <button class="toast-close" (click)="removeToast(toast.id)">✕</button>
+    <div class="toast-progress"></div>
+  </div>
+</div>
+
+<!-- Modal de Éxito -->
+<div *ngIf="successModal.show" class="success-modal-overlay">
+  <div class="success-modal">
+    <div class="success-icon-container">
+      <div class="success-checkmark">
+        <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+          <circle class="checkmark-circle" cx="26" cy="26" r="25" fill="none"/>
+          <path class="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+        </svg>
+      </div>
+    </div>
+    <h2 class="success-title">¡Éxito!</h2>
+    <p class="success-message">{{successModal.message}}</p>
+  </div>
+</div>
+
+<!-- Modal de Confirmación -->
+<div *ngIf="confirmationModal.show" class="confirmation-modal-overlay" (click)="cerrarModalConfirmacion()">
+  <div class="confirmation-modal" (click)="$event.stopPropagation()">
+    <div class="confirmation-header">
+      <div class="confirmation-icon" [class.danger]="confirmationModal.type === 'danger'" 
+           [class.warning]="confirmationModal.type === 'warning'" 
+           [class.info]="confirmationModal.type === 'info'">
+        <span *ngIf="confirmationModal.type === 'danger'">⚠️</span>
+        <span *ngIf="confirmationModal.type === 'warning'">⚠️</span>
+        <span *ngIf="confirmationModal.type === 'info'">ℹ️</span>
+      </div>
+      <h2 class="confirmation-title">{{confirmationModal.title}}</h2>
+    </div>
+    
+    <div class="confirmation-body">
+      <p class="confirmation-message">{{confirmationModal.message}}</p>
+    </div>
+    
+    <div class="confirmation-footer">
+      <button class="btn-cancel" (click)="cerrarModalConfirmacion()">
+        {{confirmationModal.cancelText}}
+      </button>
+      <button class="btn-confirm" 
+              [class.danger]="confirmationModal.type === 'danger'"
+              [class.warning]="confirmationModal.type === 'warning'"
+              [class.info]="confirmationModal.type === 'info'"
+              (click)="ejecutarAccionConfirmada()">
+        {{confirmationModal.confirmText}}
+      </button>
+    </div>
+  </div>
+</div>

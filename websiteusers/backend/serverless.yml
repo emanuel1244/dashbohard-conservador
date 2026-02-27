@@ -1,0 +1,152 @@
+service: partido-conservador-api
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: us-east-2
+  stage: ${opt:stage, 'dev'}
+  memorySize: 512
+  timeout: 30
+  
+  environment:
+    TABLE_NAME: ${self:custom.tableName}
+  
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:PutItem
+            - dynamodb:GetItem
+            - dynamodb:Scan
+            - dynamodb:Query
+            - dynamodb:BatchWriteItem
+            - dynamodb:DeleteItem
+            - dynamodb:UpdateItem
+          Resource:
+            - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tableName}
+            - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tableName}/index/*
+            - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tableName}Lideres
+            - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tableName}Lideres/index/*
+
+custom:
+  tableName: PartidoConservadorPersonas-${self:provider.stage}
+
+functions:
+  uploadExcel:
+    handler: lambda-upload-excel-multipart.handler
+    events:
+      - http:
+          path: api/upload-excel
+          method: post
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+            allowCredentials: false
+  
+  getPersonas:
+    handler: lambda-personas.getAll
+    events:
+      - http:
+          path: api/personas
+          method: get
+          cors: true
+  
+  getEstadisticas:
+    handler: lambda-personas.getEstadisticas
+    events:
+      - http:
+          path: api/estadisticas
+          method: get
+          cors: true
+  
+  getLideres:
+    handler: lambda-lideres.getAll
+    events:
+      - http:
+          path: api/lideres
+          method: get
+          cors: true
+  
+  createLider:
+    handler: lambda-lideres.create
+    events:
+      - http:
+          path: api/lideres
+          method: post
+          cors: true
+  
+  updateLider:
+    handler: lambda-lideres.update
+    events:
+      - http:
+          path: api/lideres/{id}
+          method: put
+          cors: true
+  
+  deleteLider:
+    handler: lambda-lideres.delete
+    events:
+      - http:
+          path: api/lideres/{id}
+          method: delete
+          cors: true
+
+resources:
+  Resources:
+    PersonasTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.tableName}
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+          - AttributeName: cedula
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: CedulaIndex
+            KeySchema:
+              - AttributeName: cedula
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+            ProvisionedThroughput:
+              ReadCapacityUnits: 5
+              WriteCapacityUnits: 5
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+    
+    LideresTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.tableName}Lideres
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+
+plugins:
+  - serverless-offline
+
+package:
+  exclude:
+    - node_modules/**
+    - .git/**
+  include:
+    - lambda-*.js
+    - node_modules/xlsx/**
+    - node_modules/aws-sdk/**

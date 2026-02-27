@@ -1,0 +1,15 @@
+{
+    "Content": {
+        "Location": "https://awslambda-us-west-2-layers.s3.us-west-2.amazonaws.com/snapshots/431655581275/nodejs-dependencies-layer-1d9f4a9f-3262-4ef8-9697-a7b020cedabf?versionId=mDjMa.tBegB_34_m4qJiePB8sEp26zBd&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEHsaCXVzLXdlc3QtMiJIMEYCIQCRSrQpZUsBa84HynvJ8Rb4hwVS9j2%2BxHw48PE6m8GYoAIhAKDBsXd6LvzGXMb6hki9OJoQ4p%2BuVpck5WQMlW%2Flt5gIKrAFCEQQBRoMNTAyMjk3MDc2MTYzIgz3AoUffIzCtypwujkqjQVsny%2FYDDU3S9I3Na5vJjmmvBtVQOtTQdISp17JTKG%2FiE8ESd1AmiD2jzWOMTiWTU82CykCrlc3Yi38aXQwQA4m01PJvqqgLHWr5409Q9uH5sZGGaZIa0Kx0iK9RZPKQFiiBIqqICDfdw%2FbSGepTGlzx7wZRJVEfD57M3LtGdmRzv08FTGAlnbJWoPQKNMrE%2FH8qdQG3ajvTiguWy70TgJmzhfujmnIaB91t%2F%2FG%2BPT0T47WfiDIQTyO4wvfI%2BZob9bWbRgWZvE2LsrknqZfhHlQrMBxIwPIT25b%2F0n%2BwOZnDvc%2FIGou6W4CD8EwoHCuXn4RPh2lHdjer%2BQ8NxcgFyLwCeGRX%2FV9NKBnsyfsZ89sEFE0CKiDaF%2BgjSQXV8PE6mAnDNzNRAeMOQ1qMR2OYoarZPBCRMXpyi7rSAa0WfMhfgYui3Aasi0nn6%2FyMEfZSRZsDxy8zZAFk4ZRj%2FNGwTKKbbm6sLi2d6ViMOy0rLIb1pKxNyd9WsflM33JpYqp8uu48Oi%2BvJZ9xgJevOIQO0xwVNUPilnmoViWeQRb2HqTCe%2BLNkvnZkFcdv5vXVgqWISWPEwW1Is8QnIZBAKUDK4ESBJxGFA8gh7%2FZALiNtFcTxfXO%2FWBR3n3Vp%2BSjgiJloMbKIE5aqbWqmP0MoLMh0sT%2B1YEmNz7d43YhOFw%2FHICEKU%2FcosWKXPw09IV3nQTCaiOAlC35PrtFxiaI2xCFxTnaDMQQQwTNA9HlGYnLW4o4ZJ6IBCDqY%2FesxtFCHhX5Ksw%2FQjdzuzoFi7mJGDZL7Vt74IVRm0wzS0tjP7dxH0lJVTMqWZMyVJZqdz7TgKsyJz3P8NOo1YyCrp1RDQu%2FYZ7Dum9olRYD6TpG%2FLERTCdy4fNBjqwAeysBCjrfNp3XlPImzyNmvVFznM%2Bqhngx51OCCAUzbMM6IEYVdZJRRkIEfuSEMO5IlI7CGiwCo6losQz5qtMkPDOeGsQCYwpoiSyyplcm4tjIBYrR%2FbFTu77UKXMzmUT78TkwXHV0ZWMm3gekUrjDtPyArYhpZlYLNZ6oA6xo4QuPxn7bNZvHVOuFx2LT%2Bt75u1W%2FwHjOTOuo4CeI%2BDaUhPjrJQo57NBFDlhW8GfU1Ep&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20260227T192637Z&X-Amz-SignedHeaders=host&X-Amz-Expires=600&X-Amz-Credential=ASIAXJ4Z5EHBQAKV5OG5%2F20260227%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Signature=70b224d07b4d18a8943516985622d77435c949c863a41de0f6244b2de9eff644",
+        "CodeSha256": "m8CjTYuUQht5+llxLNbPGcUJeu/ZlN0Y+7wNI7z07sU=",
+        "CodeSize": 4696441
+    },
+    "LayerArn": "arn:aws:lambda:us-west-2:431655581275:layer:nodejs-dependencies-layer",
+    "LayerVersionArn": "arn:aws:lambda:us-west-2:431655581275:layer:nodejs-dependencies-layer:1",
+    "Description": "Dependencies for Excel upload Lambda (xlsx)",
+    "CreatedDate": "2026-02-27T19:26:44.012+0000",
+    "Version": 1,
+    "CompatibleRuntimes": [
+        "nodejs20.x"
+    ]
+}
