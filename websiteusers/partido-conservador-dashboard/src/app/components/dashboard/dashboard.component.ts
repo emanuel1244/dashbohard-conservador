@@ -1,6 +1,7 @@
 import { Component, OnInit, HostListener, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { timeout, catchError } from 'rxjs/operators';
 import { throwError } from 'rxjs';
@@ -98,7 +99,7 @@ const TOAST_MESSAGES = {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, HttpClientModule],
+  imports: [CommonModule, FormsModule, HttpClientModule, RouterLink],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
 })
@@ -206,21 +207,27 @@ export class DashboardComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.cargarDatos();
+    // Usar setTimeout para evitar problemas de detección de cambios
+    setTimeout(() => {
+      this.cargarDatos();
+    }, 0);
   }
 
   cargarDatos() {
     this.http.get<Persona[]>(`${this.apiUrl}/personas`).subscribe(data => {
       this.personas = data;
       this.filtrarPersonas(); // Aplicar filtros después de cargar
+      this.cdr.detectChanges(); // Forzar detección de cambios
     });
     
     this.http.get<Lider[]>(`${this.apiUrl}/lideres`).subscribe(data => {
       this.lideres = data;
+      this.cdr.detectChanges(); // Forzar detección de cambios
     });
     
     this.http.get<Estadisticas>(`${this.apiUrl}/estadisticas`).subscribe(data => {
       this.estadisticas = data;
+      this.cdr.detectChanges(); // Forzar detección de cambios
     });
   }
 

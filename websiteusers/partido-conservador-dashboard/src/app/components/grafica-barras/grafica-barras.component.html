@@ -1,0 +1,15 @@
+<div class="grafica-barras">
+  <h3>Distribución por Lugar de Votación</h3>
+  <div class="chart-container">
+    <canvas 
+      baseChart
+      [data]="chartData"
+      [options]="chartOptions"
+      [type]="'bar'"
+      aria-label="Gráfica de barras mostrando distribución de personas por lugar de votación con desglose de líderes">
+    </canvas>
+    <div *ngIf="cargando" class="loading-overlay">
+      <span class="spinner"></span>
+    </div>
+  </div>
+</div>

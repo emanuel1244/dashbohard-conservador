@@ -1,0 +1,15 @@
+<div class="grafica-pastel">
+  <h3>Porcentaje de Distribución</h3>
+  <div class="chart-container">
+    <canvas 
+      baseChart
+      [data]="chartData"
+      [options]="chartOptions"
+      [type]="'pie'"
+      aria-label="Gráfica de pastel mostrando porcentajes de distribución por lugar de votación con desglose de líderes">
+    </canvas>
+    <div *ngIf="cargando" class="loading-overlay">
+      <span class="spinner"></span>
+    </div>
+  </div>
+</div>

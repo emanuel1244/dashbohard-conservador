@@ -7,5 +7,10 @@ export const routes: Routes = [
   { path: '', component: DashboardComponent },
   { path: 'login', component: LoginComponent },
   { path: 'lider-panel', component: LiderPanelComponent },
+  { 
+    path: 'reporte-visual', 
+    loadComponent: () => import('./components/reporte-visual/reporte-visual.component')
+      .then(m => m.ReporteVisualComponent)
+  },
   { path: '**', redirectTo: '' }
 ];

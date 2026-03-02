@@ -1,0 +1,14 @@
+<div class="acciones-exportacion">
+  <button 
+    class="btn btn-excel"
+    [disabled]="!habilitado"
+    (click)="onExportarExcel()">
+    📊 Exportar a Excel
+  </button>
+  <button 
+    class="btn btn-imagen"
+    [disabled]="!habilitado"
+    (click)="onExportarImagen()">
+    📷 Exportar Gráficas como Imagen
+  </button>
+</div>

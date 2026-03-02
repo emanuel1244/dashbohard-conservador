@@ -1,0 +1,14 @@
+<div class="filtro-lider">
+  <label for="lider-select">Filtrar por Líder:</label>
+  <select 
+    id="lider-select" 
+    [(ngModel)]="liderSeleccionadoId"
+    (change)="onSeleccionChange()"
+    class="form-select"
+    aria-label="Filtrar por líder para visualizar reporte">
+    <option value="">Todos los líderes</option>
+    <option *ngFor="let lider of lideres" [value]="lider.id">
+      {{ lider.nombre }} ({{ lider.zona }})
+    </option>
+  </select>
+</div>

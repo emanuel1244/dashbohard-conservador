@@ -1,0 +1,69 @@
+.grafica-pastel {
+  margin: 20px 0;
+
+  h3 {
+    color: #003DA5;
+    margin-bottom: 15px;
+  }
+
+  .chart-container {
+    position: relative;
+    height: 400px;
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #003DA5;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@media (max-width: 767px) {
+  .grafica-pastel {
+    .chart-container {
+      height: 300px;
+      padding: 10px;
+    }
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .grafica-pastel {
+    .chart-container {
+      height: 400px;
+    }
+  }
+}
+
+@media (min-width: 1024px) {
+  .grafica-pastel {
+    .chart-container {
+      height: 500px;
+    }
+  }
+}

@@ -1,0 +1,145 @@
+.reporte-visual-container {
+  padding: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+
+  .header-section {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 20px;
+
+    .btn-back {
+      padding: 10px 20px;
+      background-color: #003DA5;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+
+      &:hover {
+        background-color: #002d7a;
+        transform: translateX(-3px);
+      }
+    }
+  }
+
+  h2 {
+    color: #003DA5;
+    font-size: 2rem;
+    margin: 0;
+  }
+
+  .contenido-reporte {
+    margin-top: 20px;
+  }
+
+  .visualizaciones {
+    margin-top: 30px;
+  }
+
+  .graficas-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin-top: 30px;
+  }
+
+  .mensaje-vacio,
+  .mensaje-error {
+    text-align: center;
+    padding: 40px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    margin-top: 20px;
+
+    p {
+      font-size: 1.2rem;
+      color: #666;
+      margin-bottom: 20px;
+    }
+
+    .btn-reintentar {
+      padding: 10px 20px;
+      background-color: #003DA5;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+
+      &:hover {
+        background-color: #002d7a;
+      }
+    }
+  }
+
+  .mensaje-error {
+    background-color: #fff3cd;
+    border: 1px solid #ffc107;
+
+    p {
+      color: #856404;
+    }
+  }
+
+  .loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px;
+
+    .spinner {
+      width: 60px;
+      height: 60px;
+      border: 6px solid #f3f3f3;
+      border-top: 6px solid #003DA5;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 20px;
+    }
+
+    p {
+      font-size: 1.2rem;
+      color: #666;
+    }
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@media (max-width: 767px) {
+  .reporte-visual-container {
+    padding: 10px;
+
+    h2 {
+      font-size: 1.5rem;
+    }
+
+    .graficas-container {
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .reporte-visual-container {
+    .graficas-container {
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+  }
+}

@@ -1,0 +1,58 @@
+.acciones-exportacion {
+  display: flex;
+  gap: 15px;
+  margin: 20px 0;
+  flex-wrap: wrap;
+
+  .btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    &:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+
+  .btn-excel {
+    background-color: #217346;
+    color: white;
+
+    &:hover:not(:disabled) {
+      background-color: #1a5c37;
+    }
+  }
+
+  .btn-imagen {
+    background-color: #003DA5;
+    color: white;
+
+    &:hover:not(:disabled) {
+      background-color: #002d7a;
+    }
+  }
+}
+
+@media (max-width: 767px) {
+  .acciones-exportacion {
+    flex-direction: column;
+
+    .btn {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+}

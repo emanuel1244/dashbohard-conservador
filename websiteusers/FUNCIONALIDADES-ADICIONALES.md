@@ -21,6 +21,8 @@
 - Gráfico circular: Distribución por zona
 - Gráfico de líneas: Crecimiento temporal
 - Mapa de calor: Concentración geográfica
+-- sumatoria total de las personas en  y hacer las graficias por lugar de votaciones del  lider filtrar por sus putos de votacion y 80% mundo feliz y 20% locales o por fuera
+-- porcentajes y cantidades  
 
 ### 2. 👥 Gestión Avanzada de Personas
 

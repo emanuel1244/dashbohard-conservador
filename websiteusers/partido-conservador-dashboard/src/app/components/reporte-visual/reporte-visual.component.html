@@ -1,0 +1,63 @@
+<div class="reporte-visual-container">
+  <div class="header-section">
+    <button class="btn-back" routerLink="/" title="Volver al Dashboard">
+      ← Volver al Dashboard
+    </button>
+    <h2>Reporte de Lugares de Votación</h2>
+  </div>
+  
+  <app-filtro-lider 
+    [lideres]="lideres"
+    [liderSeleccionado]="filtroLiderId"
+    (liderSeleccionadoChange)="onLiderSeleccionado($event)">
+  </app-filtro-lider>
+
+  <div *ngIf="!cargando && distribucion.length > 0" class="contenido-reporte">
+    <app-estadisticas-generales 
+      [estadisticas]="estadisticas">
+    </app-estadisticas-generales>
+
+    <app-acciones-exportacion
+      [habilitado]="!cargando"
+      (exportarExcel)="exportarExcel()"
+      (exportarImagen)="exportarImagen()">
+    </app-acciones-exportacion>
+
+    <div class="visualizaciones">
+      <app-tabla-distribucion 
+        [distribucion]="distribucion"
+        [cargando]="cargando">
+      </app-tabla-distribucion>
+
+      <div class="graficas-container">
+        <div id="grafica-barras">
+          <app-grafica-barras 
+            [distribucion]="distribucion"
+            [cargando]="cargando">
+          </app-grafica-barras>
+        </div>
+
+        <div id="grafica-pastel">
+          <app-grafica-pastel 
+            [distribucion]="distribucion"
+            [cargando]="cargando">
+          </app-grafica-pastel>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="!cargando && distribucion.length === 0" class="mensaje-vacio">
+    <p>{{ mensajeVacio }}</p>
+  </div>
+
+  <div *ngIf="cargando" class="loading-container">
+    <span class="spinner"></span>
+    <p>Cargando datos...</p>
+  </div>
+
+  <div *ngIf="error" class="mensaje-error">
+    <p>{{ error }}</p>
+    <button (click)="cargarDatos()" class="btn-reintentar">Reintentar</button>
+  </div>
+</div>

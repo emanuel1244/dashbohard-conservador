@@ -1,0 +1,28 @@
+<div class="estadisticas-generales">
+  <div class="stat-card">
+    <span class="stat-label">Total Personas</span>
+    <span class="stat-value">{{ estadisticas.totalPersonas }}</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-label">Lugares de Votación</span>
+    <span class="stat-value">{{ estadisticas.totalLugares }}</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-label">Promedio por Lugar</span>
+    <span class="stat-value">{{ estadisticas.promedioPersonasPorLugar | number:'1.1-1' }}</span>
+  </div>
+  <div class="stat-card" *ngIf="estadisticas.lugarConMasPersonas">
+    <span class="stat-label">Mayor Concentración</span>
+    <span class="stat-value">{{ estadisticas.lugarConMasPersonas.nombre }}</span>
+    <span class="stat-detail">({{ estadisticas.lugarConMasPersonas.cantidad }} personas)</span>
+  </div>
+  <div class="stat-card" *ngIf="estadisticas.lugarConMenosPersonas">
+    <span class="stat-label">Menor Concentración</span>
+    <span class="stat-value">{{ estadisticas.lugarConMenosPersonas.nombre }}</span>
+    <span class="stat-detail">({{ estadisticas.lugarConMenosPersonas.cantidad }} personas)</span>
+  </div>
+  <div class="stat-card" *ngIf="estadisticas.porcentajeSinAsignar > 0">
+    <span class="stat-label">Sin Lugar Asignado</span>
+    <span class="stat-value">{{ estadisticas.porcentajeSinAsignar | number:'1.2-2' }}%</span>
+  </div>
+</div>

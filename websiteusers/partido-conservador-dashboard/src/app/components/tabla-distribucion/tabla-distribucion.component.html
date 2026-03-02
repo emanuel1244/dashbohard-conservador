@@ -1,0 +1,38 @@
+<div class="tabla-distribucion">
+  <h3>Distribución por Lugar de Votación</h3>
+  <div class="table-container">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Lugar de Votación</th>
+          <th>Total Personas</th>
+          <th>Líderes</th>
+          <th>Porcentaje</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of distribucion">
+          <td>{{ item.lugar }}</td>
+          <td>{{ item.cantidadTotal }}</td>
+          <td>
+            <div class="desglose-lideres">
+              <span *ngFor="let desglose of item.desgloseLideres; let last = last" class="lider-item">
+                {{ desglose.liderNombre }}: {{ desglose.cantidad }}<span *ngIf="!last">, </span>
+              </span>
+            </div>
+          </td>
+          <td>{{ item.porcentaje | number:'1.2-2' }}%</td>
+        </tr>
+        <tr class="total-row">
+          <td><strong>TOTAL</strong></td>
+          <td><strong>{{ calcularTotal() }}</strong></td>
+          <td></td>
+          <td><strong>100.00%</strong></td>
+        </tr>
+      </tbody>
+    </table>
+    <div *ngIf="cargando" class="loading-overlay">
+      <span class="spinner"></span>
+    </div>
+  </div>
+</div>
