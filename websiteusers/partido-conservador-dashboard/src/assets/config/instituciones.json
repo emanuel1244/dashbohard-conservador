@@ -1,0 +1,54 @@
+{
+  "version": "1.0.0",
+  "ultimaActualizacion": "2026-03-02",
+  "instituciones": [
+    {
+      "id": "maria-auxiliadora-principal",
+      "nombre": "MARIA AUXILIADORA",
+      "nombreCompleto": "MARIA AUXILIADORA SEDE PRINCIPAL",
+      "tipo": "colegio",
+      "sedes": ["PRINCIPAL"],
+      "activa": true
+    },
+    {
+      "id": "maria-auxiliadora-sede-2",
+      "nombre": "MARIA AUXILIADORA",
+      "nombreCompleto": "MARIA AUXILIADORA SEDE 2",
+      "tipo": "colegio",
+      "sedes": ["2"],
+      "activa": true
+    },
+    {
+      "id": "francisco-de-paula-principal",
+      "nombre": "FRANCISCO DE PAULA",
+      "nombreCompleto": "FRANCISCO DE PAULA PRINCIPAL",
+      "tipo": "colegio",
+      "sedes": ["PRINCIPAL"],
+      "activa": true
+    },
+    {
+      "id": "petronitas",
+      "nombre": "PETRONITAS",
+      "nombreCompleto": "PETRONITAS",
+      "tipo": "colegio",
+      "sedes": [],
+      "activa": true
+    },
+    {
+      "id": "megacolegio-villa-olimpica",
+      "nombre": "MEGACOLEGIO VILLA OLIMPICA",
+      "nombreCompleto": "MEGACOLEGIO VILLA OLIMPICA",
+      "tipo": "colegio",
+      "sedes": [],
+      "activa": true
+    },
+    {
+      "id": "carruages",
+      "nombre": "CARRUAGES",
+      "nombreCompleto": "CARRUAGES",
+      "tipo": "colegio",
+      "sedes": [],
+      "activa": true
+    }
+  ]
+}

@@ -1,0 +1,87 @@
+<div class="lugar-votacion-selector">
+  <label class="selector-label">
+    Lugar de Votación <span class="required">*</span>
+  </label>
+
+  <!-- Loading state -->
+  <div *ngIf="cargando" class="loading-skeleton">
+    <div class="skeleton-item"></div>
+  </div>
+
+  <!-- Error state -->
+  <div *ngIf="error && !cargando" class="error-banner">
+    <span class="error-icon">⚠️</span>
+    <span>{{ error }}. Use el campo personalizado.</span>
+  </div>
+
+  <!-- Dropdown selector style -->
+  <div *ngIf="!cargando && !error" class="dropdown-container">
+    <!-- Selected value display -->
+    <div 
+      class="dropdown-header"
+      [class.disabled]="disabled"
+      [class.open]="dropdownAbierto"
+      (click)="toggleDropdown()"
+      tabindex="0"
+      (keydown.space)="$event.preventDefault(); toggleDropdown()"
+      (keydown.enter)="$event.preventDefault(); toggleDropdown()">
+      <div class="dropdown-value">
+        <span class="dropdown-icon">📍</span>
+        <span class="dropdown-text">{{ obtenerTextoSeleccionado() }}</span>
+      </div>
+      <span class="dropdown-arrow" [class.rotated]="dropdownAbierto">▼</span>
+    </div>
+
+    <!-- Dropdown options -->
+    <div *ngIf="dropdownAbierto" class="dropdown-options" role="radiogroup" aria-label="Seleccione lugar de votación">
+      <div 
+        *ngFor="let institucion of instituciones"
+        class="dropdown-option"
+        [class.selected]="esInstitucionSeleccionada(institucion.id)"
+        (click)="seleccionarInstitucionYCerrar(institucion.id)"
+        role="radio"
+        [attr.aria-checked]="esInstitucionSeleccionada(institucion.id)"
+        [attr.aria-label]="institucion.nombreCompleto"
+        tabindex="0"
+        (keydown.space)="$event.preventDefault(); seleccionarInstitucionYCerrar(institucion.id)"
+        (keydown.enter)="$event.preventDefault(); seleccionarInstitucionYCerrar(institucion.id)">
+        <span class="option-text">{{ institucion.nombreCompleto }}</span>
+        <span *ngIf="esInstitucionSeleccionada(institucion.id)" class="check-icon">✓</span>
+      </div>
+
+      <!-- Custom option -->
+      <div 
+        class="dropdown-option custom-option"
+        [class.selected]="esModoCustomActivo()"
+        (click)="seleccionarModoCustomYCerrar()"
+        role="radio"
+        [attr.aria-checked]="esModoCustomActivo()"
+        aria-label="Otro (escribir manualmente)"
+        tabindex="0"
+        (keydown.space)="$event.preventDefault(); seleccionarModoCustomYCerrar()"
+        (keydown.enter)="$event.preventDefault(); seleccionarModoCustomYCerrar()">
+        <span class="option-text">✏️ Otro (escribir manualmente)</span>
+        <span *ngIf="esModoCustomActivo()" class="check-icon">✓</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom text input -->
+  <div *ngIf="esModoCustomActivo()" class="custom-input-wrapper">
+    <input 
+      type="text"
+      class="custom-input"
+      [(ngModel)]="textoCustom"
+      (ngModelChange)="actualizarTextoCustom($event)"
+      [disabled]="disabled"
+      [maxlength]="MAX_CARACTERES"
+      placeholder="Escriba el lugar de votación"
+      aria-label="Lugar de votación personalizado"
+      aria-describedby="custom-help-text"
+      [attr.aria-invalid]="caracteresRestantes < 0"
+    />
+    <div class="character-counter" id="custom-help-text">
+      {{ caracteresRestantes }}/{{ MAX_CARACTERES }} caracteres
+    </div>
+  </div>
+</div>

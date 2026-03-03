@@ -6,6 +6,7 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { timeout, catchError } from 'rxjs/operators';
 import { throwError } from 'rxjs';
 import { ExportService } from '../../services/export.service';
+import { LugarVotacionSelectorComponent } from '../lugar-votacion-selector/lugar-votacion-selector.component';
 
 interface Persona {
   id: string;
@@ -99,7 +100,7 @@ const TOAST_MESSAGES = {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, HttpClientModule, RouterLink],
+  imports: [CommonModule, FormsModule, HttpClientModule, RouterLink, LugarVotacionSelectorComponent],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
 })
@@ -524,6 +525,24 @@ export class DashboardComponent implements OnInit {
     this.isSubmitting = false;
     this.cdr.detectChanges(); // Forzar detección de cambios
     console.log('Modal cerrado, isSubmitting:', this.isSubmitting);
+  }
+
+  /**
+   * Maneja el cambio de valor del selector de lugar de votación
+   */
+  onLugarVotacionChange(valor: string): void {
+    this.personaForm.lugarVotacion = valor;
+  }
+
+  /**
+   * Maneja los cambios de validación del selector de lugar de votación
+   */
+  onLugarVotacionValidationChange(result: { isValid: boolean; error?: string }): void {
+    if (result.isValid) {
+      delete this.validationErrors['lugarVotacion'];
+    } else if (result.error) {
+      this.validationErrors['lugarVotacion'] = result.error;
+    }
   }
 
   validateForm(): boolean {

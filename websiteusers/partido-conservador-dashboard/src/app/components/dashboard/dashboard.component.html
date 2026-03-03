@@ -658,16 +658,15 @@
               placeholder="Número de mesa"
               [disabled]="isSubmitting">
           </div>
-          
-          <div class="form-group">
-            <label>Lugar de Votación</label>
-            <input 
-              type="text" 
-              [(ngModel)]="personaForm.lugarVotacion" 
-              placeholder="IE MARIA AUXILIADORA"
-              [disabled]="isSubmitting">
-          </div>
         </div>
+        
+        <!-- Selector de Lugar de Votación Mejorado -->
+        <app-lugar-votacion-selector
+          [valorInicial]="personaForm.lugarVotacion"
+          [disabled]="isSubmitting"
+          (onChange)="onLugarVotacionChange($event)"
+          (onValidationChange)="onLugarVotacionValidationChange($event)">
+        </app-lugar-votacion-selector>
         
         <div class="form-group">
           <label>Dirección del Lugar de Votación</label>
