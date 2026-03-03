@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, AfterViewInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { forkJoin, Subject } from 'rxjs';
@@ -35,7 +35,7 @@ import { AccionesExportacionComponent } from '../acciones-exportacion/acciones-e
   templateUrl: './reporte-visual.component.html',
   styleUrl: './reporte-visual.component.scss'
 })
-export class ReporteVisualComponent implements OnInit, OnDestroy {
+export class ReporteVisualComponent implements OnInit, AfterViewInit, OnDestroy {
   personas: Persona[] = [];
   lideres: Lider[] = [];
   filtroLiderId: string | null = null;
@@ -44,6 +44,11 @@ export class ReporteVisualComponent implements OnInit, OnDestroy {
   cargando = true;
   error: string | null = null;
   mensajeVacio = 'No hay datos para mostrar';
+
+  // Modal de personas por lugar
+  mostrarModalPersonas = false;
+  lugarSeleccionado = '';
+  personasLugarSeleccionado: Persona[] = [];
 
   private destroy$ = new Subject<void>();
 
@@ -54,7 +59,11 @@ export class ReporteVisualComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    // Cargar datos después de que el componente esté completamente inicializado
+    // No cargar datos aquí para evitar ExpressionChangedAfterItHasBeenCheckedError
+  }
+
+  ngAfterViewInit(): void {
+    // Cargar datos después de que la vista esté completamente inicializada
     setTimeout(() => {
       this.cargarDatos();
     }, 0);
@@ -66,21 +75,15 @@ export class ReporteVisualComponent implements OnInit, OnDestroy {
   }
 
   cargarDatos(): void {
-    console.log('🔄 cargarDatos() llamado');
-    console.log('Estado inicial - cargando:', this.cargando);
-    
     this.cargando = true;
     this.error = null;
-
-    console.log('🔄 Iniciando carga de datos...');
-    console.log('Estado después de setear true - cargando:', this.cargando);
 
     // Agregar un timeout de seguridad
     const timeout = setTimeout(() => {
       if (this.cargando) {
-        console.warn('⚠️ Timeout alcanzado, forzando fin de carga');
         this.cargando = false;
         this.error = 'La carga tomó demasiado tiempo. Por favor, intenta nuevamente.';
+        this.cdr.detectChanges();
       }
     }, 10000); // 10 segundos
 
@@ -91,26 +94,14 @@ export class ReporteVisualComponent implements OnInit, OnDestroy {
     .pipe(takeUntil(this.destroy$))
     .subscribe({
       next: ({ personas, lideres }) => {
-        console.log('📦 Callback next() ejecutado');
         clearTimeout(timeout);
-        console.log('✅ Datos recibidos:', { 
-          totalPersonas: personas.length, 
-          totalLideres: lideres.length 
-        });
         this.personas = personas;
         this.lideres = lideres;
-        console.log('📊 Llamando actualizarVisualizaciones()');
         this.actualizarVisualizaciones();
-        console.log('🏁 Seteando cargando = false');
         this.cargando = false;
-        console.log('Estado final - cargando:', this.cargando);
-        // Forzar detección de cambios
-        console.log('🔄 Llamando detectChanges()');
         this.cdr.detectChanges();
-        console.log('✅ detectChanges() completado');
       },
       error: (err) => {
-        console.log('❌ Callback error() ejecutado');
         clearTimeout(timeout);
         console.error('❌ Error cargando datos:', err);
         this.error = 'Error al cargar los datos. Intenta nuevamente.';
@@ -118,32 +109,20 @@ export class ReporteVisualComponent implements OnInit, OnDestroy {
         this.cdr.detectChanges();
       }
     });
-    
-    console.log('🔄 Subscripción creada, esperando respuesta...');
   }
 
   onLiderSeleccionado(liderId: string | null): void {
-    console.log('📥 Líder seleccionado recibido:', liderId);
     this.filtroLiderId = liderId;
     this.actualizarVisualizaciones();
   }
 
   actualizarVisualizaciones(): void {
-    console.log('📊 Actualizando visualizaciones...');
-    console.log('Filtro líder ID:', this.filtroLiderId);
-    console.log('Total personas antes de filtrar:', this.personas.length);
-    
     this.distribucion = this.reporteService.calcularDistribucionPorLugar(
       this.personas,
       this.filtroLiderId
     );
     
-    console.log('Distribución calculada:', this.distribucion);
-    console.log('Total lugares:', this.distribucion.length);
-    
     this.estadisticas = this.reporteService.calcularEstadisticas(this.distribucion);
-    
-    console.log('Estadísticas calculadas:', this.estadisticas);
     
     if (this.distribucion.length === 0) {
       if (this.filtroLiderId) {
@@ -152,7 +131,6 @@ export class ReporteVisualComponent implements OnInit, OnDestroy {
       } else {
         this.mensajeVacio = 'No hay datos para mostrar';
       }
-      console.log('⚠️ Sin datos para mostrar:', this.mensajeVacio);
     }
   }
 
@@ -175,6 +153,98 @@ export class ReporteVisualComponent implements OnInit, OnDestroy {
     } catch (error) {
       console.error('Error exportando gráficas:', error);
       alert('Error al exportar las gráficas. Intenta nuevamente.');
+    }
+  }
+
+  async exportarPersonasCompleto(): Promise<void> {
+    try {
+      // Filtrar personas si hay un líder seleccionado
+      const personasAExportar = this.filtroLiderId
+        ? this.personas.filter(p => p.liderId === this.filtroLiderId)
+        : this.personas;
+
+      if (personasAExportar.length === 0) {
+        alert('No hay personas para exportar');
+        return;
+      }
+
+      const liderNombre = this.filtroLiderId 
+        ? this.lideres.find(l => l.id === this.filtroLiderId)?.nombre 
+        : null;
+      
+      await this.exportacionService.exportarPersonasExcel(personasAExportar, liderNombre);
+    } catch (error) {
+      console.error('Error exportando personas:', error);
+      alert('Error al exportar el listado de personas. Intenta nuevamente.');
+    }
+  }
+
+  mostrarPersonasPorLugar(lugar: string): void {
+    this.lugarSeleccionado = lugar;
+    
+    // Normalizar el lugar de la misma forma que en el servicio
+    const lugarNormalizado = lugar.trim().toUpperCase();
+    
+    // Filtrar personas por lugar
+    this.personasLugarSeleccionado = this.personas.filter(p => {
+      const lugarPersona = p.lugarVotacion?.trim().toUpperCase() || 'SIN ASIGNAR';
+      return lugarPersona === lugarNormalizado || 
+             (lugarNormalizado === 'SIN ASIGNAR' && (!p.lugarVotacion || p.lugarVotacion.trim() === ''));
+    });
+
+    // Aplicar filtro de líder si está activo
+    if (this.filtroLiderId) {
+      this.personasLugarSeleccionado = this.personasLugarSeleccionado.filter(
+        p => p.liderId === this.filtroLiderId
+      );
+    }
+
+    // Ordenar alfabéticamente por nombre
+    this.personasLugarSeleccionado.sort((a, b) => {
+      const nombreA = a.nombre?.toLowerCase() || '';
+      const nombreB = b.nombre?.toLowerCase() || '';
+      return nombreA.localeCompare(nombreB);
+    });
+
+    this.mostrarModalPersonas = true;
+  }
+
+  cerrarModalPersonas(): void {
+    this.mostrarModalPersonas = false;
+    this.lugarSeleccionado = '';
+    this.personasLugarSeleccionado = [];
+  }
+
+  async descargarPersonasPorLugar(lugar: string): Promise<void> {
+    try {
+      // Normalizar el lugar
+      const lugarNormalizado = lugar.trim().toUpperCase();
+      
+      // Filtrar personas por lugar
+      let personasLugar = this.personas.filter(p => {
+        const lugarPersona = p.lugarVotacion?.trim().toUpperCase() || 'SIN ASIGNAR';
+        return lugarPersona === lugarNormalizado || 
+               (lugarNormalizado === 'SIN ASIGNAR' && (!p.lugarVotacion || p.lugarVotacion.trim() === ''));
+      });
+
+      // Aplicar filtro de líder si está activo
+      if (this.filtroLiderId) {
+        personasLugar = personasLugar.filter(p => p.liderId === this.filtroLiderId);
+      }
+
+      if (personasLugar.length === 0) {
+        alert('No hay personas para exportar en este lugar');
+        return;
+      }
+
+      const liderNombre = this.filtroLiderId 
+        ? this.lideres.find(l => l.id === this.filtroLiderId)?.nombre 
+        : null;
+      
+      await this.exportacionService.exportarPersonasExcel(personasLugar, liderNombre);
+    } catch (error) {
+      console.error('Error exportando personas por lugar:', error);
+      alert('Error al exportar el listado de personas. Intenta nuevamente.');
     }
   }
 

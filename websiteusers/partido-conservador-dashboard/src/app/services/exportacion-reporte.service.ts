@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import * as ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
-import { DistribucionLugar } from '../models/reporte-visual.models';
+import { DistribucionLugar, Persona } from '../models/reporte-visual.models';
 
 @Injectable({
   providedIn: 'root'
@@ -137,5 +137,83 @@ export class ExportacionReporteService {
       console.error('Error exportando gráficas:', error);
       throw new Error('Error al exportar las gráficas como imagen');
     }
+  }
+
+  /**
+   * Exportar listado completo de personas a Excel
+   * @param personas Array de personas a exportar
+   * @param filtroLider Nombre del líder filtrado (opcional)
+   */
+  async exportarPersonasExcel(
+    personas: Persona[],
+    filtroLider?: string | null
+  ): Promise<void> {
+    if (!personas || personas.length === 0) {
+      throw new Error('No hay personas para exportar');
+    }
+
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Listado de Personas');
+
+    // Configurar columnas
+    worksheet.columns = [
+      { header: 'Nombre', key: 'nombre', width: 30 },
+      { header: 'Cédula', key: 'cedula', width: 15 },
+      { header: 'Celular', key: 'celular', width: 15 },
+      { header: 'Correo', key: 'correo', width: 30 },
+      { header: 'Lugar de Votación', key: 'lugarVotacion', width: 30 },
+      { header: 'Mesa', key: 'mesa', width: 10 },
+      { header: 'Dirección', key: 'direccion', width: 35 },
+      { header: 'Zona', key: 'zona', width: 20 },
+      { header: 'Líder Asignado', key: 'liderNombre', width: 25 },
+      { header: 'Estado', key: 'estado', width: 12 },
+      { header: 'Nivel Compromiso', key: 'nivelCompromiso', width: 18 }
+    ];
+
+    // Agregar filas de datos
+    personas.forEach(persona => {
+      worksheet.addRow({
+        nombre: persona.nombre || '',
+        cedula: persona.cedula || '',
+        celular: persona.celular || '',
+        correo: persona.correo || '',
+        lugarVotacion: persona.lugarVotacion || '',
+        mesa: persona.mesa || '',
+        direccion: persona.direccion || '',
+        zona: persona.zona || '',
+        liderNombre: persona.liderNombre || 'Sin líder',
+        estado: persona.estado || 'Activo',
+        nivelCompromiso: persona.nivelCompromiso || 'Medio'
+      });
+    });
+
+    // Estilizar encabezados
+    const headerRow = worksheet.getRow(1);
+    headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+    headerRow.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FF003DA5' }
+    };
+    headerRow.alignment = { vertical: 'middle', horizontal: 'left' };
+
+    // Agregar filtros automáticos
+    worksheet.autoFilter = {
+      from: 'A1',
+      to: 'K1'
+    };
+
+    // Generar nombre de archivo
+    const fecha = new Date();
+    const timestamp = fecha.toISOString().replace(/[-:]/g, '').split('.')[0].replace('T', '_');
+    const nombreLider = filtroLider ? filtroLider.replace(/\s+/g, '_') : 'todos';
+    const filename = `listado_personas_${nombreLider}_${timestamp}.xlsx`;
+
+    // Generar y descargar archivo
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { 
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+    });
+    saveAs(blob, filename);
   }
 }

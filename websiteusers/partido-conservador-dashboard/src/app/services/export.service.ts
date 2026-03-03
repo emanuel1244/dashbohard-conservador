@@ -221,4 +221,51 @@ export class ExportService {
       catchError(this.handleError)
     );
   }
+
+  /**
+   * Exportar personas a Excel con nombre personalizado
+   * Útil para exportar por mesa o institución específica
+   */
+  exportarPersonasExcelConNombre(personas: any[], nombreDescriptivo: string): Observable<Blob> {
+    console.log('=== EXPORT SERVICE: exportarPersonasExcelConNombre ===');
+    console.log('Personas a exportar:', personas.length);
+    console.log('Nombre descriptivo:', nombreDescriptivo);
+    
+    // Usar POST para enviar personas directamente
+    const url = `${this.API_URL}/export/excel`;
+    
+    // Generar nombre de archivo limpio
+    const nombreArchivo = nombreDescriptivo
+      .replace(/[^a-zA-Z0-9\s]/g, '') // Eliminar caracteres especiales
+      .replace(/\s+/g, '_') // Reemplazar espacios por guiones bajos
+      .toLowerCase();
+    
+    const timestamp = new Date().toISOString().split('T')[0];
+    const filename = `personas_${nombreArchivo}_${timestamp}.xlsx`;
+    
+    return this.http.post(url, {
+      type: 'personas-custom',
+      personas: personas,
+      filename: filename
+    }, { 
+      responseType: 'text',
+      observe: 'response'
+    }).pipe(
+      map(response => {
+        if (!response.body) {
+          throw new Error('No se recibió el archivo');
+        }
+        
+        // Decode base64 to Blob
+        const mimeType = this.getMimeType();
+        const blob = this.base64ToBlob(response.body, mimeType);
+        
+        // Download file
+        this.downloadFile(blob, filename);
+        
+        return blob;
+      }),
+      catchError(this.handleError)
+    );
+  }
 }

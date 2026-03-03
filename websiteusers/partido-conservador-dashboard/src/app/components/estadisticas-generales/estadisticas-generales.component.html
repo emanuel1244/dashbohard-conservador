@@ -1,7 +1,8 @@
 <div class="estadisticas-generales">
-  <div class="stat-card">
+  <div class="stat-card clickable" (click)="onExportarPersonas()" title="Clic para descargar listado completo">
     <span class="stat-label">Total Personas</span>
     <span class="stat-value">{{ estadisticas.totalPersonas }}</span>
+    <span class="stat-action">📥 Descargar</span>
   </div>
   <div class="stat-card">
     <span class="stat-label">Lugares de Votación</span>

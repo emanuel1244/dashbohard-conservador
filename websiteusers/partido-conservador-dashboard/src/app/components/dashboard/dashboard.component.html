@@ -756,11 +756,31 @@
       <div class="mesas-resumen" *ngIf="!cargandoPersonasMesa && !errorPersonasMesa && mesasEnInstitucion.length > 0">
         <h3>📋 Mesas en esta institución:</h3>
         <div class="mesas-chips">
-          <div class="mesa-chip" *ngFor="let mesa of mesasEnInstitucion">
+          <div class="mesa-chip clickeable" 
+               *ngFor="let mesa of mesasEnInstitucion"
+               [class.active]="mesaSeleccionada === mesa.mesa"
+               (click)="filtrarPorMesa(mesa.mesa)"
+               title="Clic para ver solo esta mesa">
             <span class="mesa-numero">Mesa {{mesa.mesa}}</span>
             <span class="mesa-badge">{{mesa.cantidad}}</span>
           </div>
+          <button class="btn-limpiar-mesa" 
+                  *ngIf="mesaSeleccionada"
+                  (click)="limpiarFiltroMesa()"
+                  title="Ver todas las mesas">
+            ✕ Todas
+          </button>
         </div>
+      </div>
+
+      <!-- Botones de exportación -->
+      <div class="export-actions" *ngIf="!cargandoPersonasMesa && !errorPersonasMesa && personasMesaFiltradas.length > 0">
+        <button class="btn-export" 
+                (click)="descargarExcelMesa()"
+                [disabled]="isExporting"
+                title="Descargar Excel de las personas mostradas">
+          📥 Descargar Excel {{mesaSeleccionada ? '(Mesa ' + mesaSeleccionada + ')' : '(Todas)'}}
+        </button>
       </div>
 
       <!-- Buscador -->

@@ -14,6 +14,7 @@
     align-items: center;
     text-align: center;
     border-left: 4px solid #003DA5;
+    transition: all 0.3s ease;
 
     .stat-label {
       font-size: 0.9rem;
@@ -32,6 +33,32 @@
       font-size: 0.85rem;
       color: #888;
     }
+
+    .stat-action {
+      font-size: 0.8rem;
+      color: #003DA5;
+      margin-top: 8px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    &.clickable {
+      cursor: pointer;
+      
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 61, 165, 0.2);
+        border-left-color: #FFD700;
+
+        .stat-action {
+          opacity: 1;
+        }
+      }
+
+      &:active {
+        transform: translateY(0);
+      }
+    }
   }
 }
 
@@ -42,6 +69,10 @@
     .stat-card {
       .stat-value {
         font-size: 1.5rem;
+      }
+
+      &.clickable .stat-action {
+        opacity: 1;
       }
     }
   }

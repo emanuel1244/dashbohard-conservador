@@ -143,3 +143,178 @@
     }
   }
 }
+
+// Modal de Personas por Lugar
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.modal-content {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  max-width: 800px;
+  width: 100%;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 2px solid #003DA5;
+
+  h3 {
+    margin: 0;
+    color: #003DA5;
+    font-size: 1.5rem;
+  }
+
+  .btn-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #666;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background-color: #f0f0f0;
+      color: #003DA5;
+    }
+  }
+}
+
+.modal-body {
+  padding: 20px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #e0e0e0;
+
+  .btn-descargar-modal {
+    padding: 10px 20px;
+    background-color: #003DA5;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+
+    &:hover {
+      background-color: #002d7a;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 61, 165, 0.3);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+  }
+
+  .total-modal {
+    font-weight: 600;
+    color: #003DA5;
+    font-size: 1.1rem;
+  }
+}
+
+.personas-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.persona-item {
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  border-left: 4px solid #003DA5;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: #e9ecef;
+    transform: translateX(5px);
+  }
+
+  .persona-nombre {
+    font-weight: 600;
+    color: #003DA5;
+    font-size: 1.05rem;
+    margin-bottom: 8px;
+  }
+
+  .persona-detalles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    font-size: 0.9rem;
+    color: #666;
+
+    span {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+  }
+}
+
+@media (max-width: 767px) {
+  .modal-content {
+    max-height: 90vh;
+  }
+
+  .modal-header h3 {
+    font-size: 1.2rem;
+  }
+
+  .modal-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+
+    .btn-descargar-modal {
+      width: 100%;
+    }
+
+    .total-modal {
+      text-align: center;
+    }
+  }
+
+  .persona-item {
+    .persona-detalles {
+      flex-direction: column;
+      gap: 8px;
+    }
+  }
+}

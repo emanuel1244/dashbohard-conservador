@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Estadisticas } from '../../models/reporte-visual.models';
 
@@ -11,4 +11,9 @@ import { Estadisticas } from '../../models/reporte-visual.models';
 })
 export class EstadisticasGeneralesComponent {
   @Input() estadisticas!: Estadisticas;
+  @Output() exportarPersonas = new EventEmitter<void>();
+
+  onExportarPersonas(): void {
+    this.exportarPersonas.emit();
+  }
 }

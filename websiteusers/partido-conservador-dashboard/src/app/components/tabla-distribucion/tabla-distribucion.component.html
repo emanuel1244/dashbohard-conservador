@@ -13,7 +13,20 @@
       <tbody>
         <tr *ngFor="let item of distribucion">
           <td>{{ item.lugar }}</td>
-          <td>{{ item.cantidadTotal }}</td>
+          <td>
+            <div class="total-personas-cell">
+              <span class="total-numero clickable" 
+                    (click)="onVerPersonas(item.lugar)"
+                    title="Clic para ver personas">
+                {{ item.cantidadTotal }}
+              </span>
+              <button class="btn-descargar-mini" 
+                      (click)="onDescargarPersonas($event, item.lugar)"
+                      title="Descargar Excel de este lugar">
+                📥
+              </button>
+            </div>
+          </td>
           <td>
             <div class="desglose-lideres">
               <span *ngFor="let desglose of item.desgloseLideres; let last = last" class="lider-item">

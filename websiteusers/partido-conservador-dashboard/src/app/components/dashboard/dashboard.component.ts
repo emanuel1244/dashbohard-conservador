@@ -1068,17 +1068,140 @@ export class DashboardComponent implements OnInit {
   }
   
   get personasMesaFiltradas(): Persona[] {
-    if (!this.searchTermMesa.trim()) {
-      return this.personasMesaActual;
+    let resultado = this.personasMesaActual;
+    
+    // Filtrar por mesa seleccionada
+    if (this.mesaSeleccionada) {
+      resultado = resultado.filter(p => p.mesa === this.mesaSeleccionada);
     }
     
-    const term = this.searchTermMesa.toLowerCase();
-    return this.personasMesaActual.filter(persona => 
-      (persona.nombre && persona.nombre.toLowerCase().includes(term)) ||
-      (persona.cedula && persona.cedula.includes(term)) ||
-      (persona.mesa && persona.mesa.includes(term)) ||
-      (persona.liderNombre && persona.liderNombre.toLowerCase().includes(term))
-    );
+    // Filtrar por término de búsqueda
+    if (this.searchTermMesa.trim()) {
+      const term = this.searchTermMesa.toLowerCase();
+      resultado = resultado.filter(persona => 
+        (persona.nombre && persona.nombre.toLowerCase().includes(term)) ||
+        (persona.cedula && persona.cedula.includes(term)) ||
+        (persona.mesa && persona.mesa.includes(term)) ||
+        (persona.liderNombre && persona.liderNombre.toLowerCase().includes(term))
+      );
+    }
+    
+    // Ordenar alfabéticamente por nombre
+    resultado.sort((a, b) => {
+      const nombreA = a.nombre?.toLowerCase() || '';
+      const nombreB = b.nombre?.toLowerCase() || '';
+      return nombreA.localeCompare(nombreB);
+    });
+    
+    return resultado;
+  }
+
+  filtrarPorMesa(mesa: string): void {
+    if (this.mesaSeleccionada === mesa) {
+      // Si ya está seleccionada, deseleccionar
+      this.mesaSeleccionada = '';
+    } else {
+      // Seleccionar la mesa
+      this.mesaSeleccionada = mesa;
+    }
+  }
+
+  limpiarFiltroMesa(): void {
+    this.mesaSeleccionada = '';
+  }
+
+  descargarExcelMesa(): void {
+    if (this.isExporting || this.personasMesaFiltradas.length === 0) {
+      if (this.personasMesaFiltradas.length === 0) {
+        this.mostrarMensajeAdvertencia('No hay personas para exportar');
+      }
+      return;
+    }
+
+    this.isExporting = true;
+    
+    // Usar ExcelJS para generar el archivo localmente
+    this.generarExcelLocal();
+  }
+
+  async generarExcelLocal(): Promise<void> {
+    try {
+      // Importar ExcelJS dinámicamente
+      const ExcelJS = await import('exceljs');
+      
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet('Personas');
+
+      // Configurar columnas
+      worksheet.columns = [
+        { header: 'Nombre', key: 'nombre', width: 30 },
+        { header: 'Cédula', key: 'cedula', width: 15 },
+        { header: 'Celular', key: 'celular', width: 15 },
+        { header: 'Correo', key: 'correo', width: 30 },
+        { header: 'Mesa', key: 'mesa', width: 10 },
+        { header: 'Lugar de Votación', key: 'lugarVotacion', width: 30 },
+        { header: 'Dirección', key: 'direccion', width: 35 },
+        { header: 'Líder Asignado', key: 'liderNombre', width: 25 },
+        { header: 'Estado', key: 'estado', width: 12 }
+      ];
+
+      // Agregar filas de datos
+      this.personasMesaFiltradas.forEach(persona => {
+        worksheet.addRow({
+          nombre: persona.nombre || '',
+          cedula: persona.cedula || '',
+          celular: persona.celular || '',
+          correo: persona.correo || '',
+          mesa: persona.mesa || '',
+          lugarVotacion: persona.lugarVotacion || '',
+          direccion: persona.direccion || '',
+          liderNombre: persona.liderNombre || 'Sin líder',
+          estado: persona.estado || 'Activo'
+        });
+      });
+
+      // Estilizar encabezados
+      const headerRow = worksheet.getRow(1);
+      headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+      headerRow.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FF003DA5' }
+      };
+      headerRow.alignment = { vertical: 'middle', horizontal: 'left' };
+
+      // Agregar filtros automáticos
+      worksheet.autoFilter = {
+        from: 'A1',
+        to: 'I1'
+      };
+
+      // Generar nombre de archivo
+      const fecha = new Date();
+      const timestamp = fecha.toISOString().split('T')[0];
+      let nombreArchivo = this.institucionSeleccionada.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '_');
+      if (this.mesaSeleccionada) {
+        nombreArchivo += `_Mesa_${this.mesaSeleccionada}`;
+      }
+      const filename = `personas_${nombreArchivo}_${timestamp}.xlsx`;
+
+      // Generar y descargar archivo
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { 
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+      });
+      
+      // Usar FileSaver para descargar
+      const FileSaver = await import('file-saver');
+      FileSaver.saveAs(blob, filename);
+
+      this.isExporting = false;
+      this.mostrarMensajeExito('Archivo Excel generado exitosamente');
+    } catch (error) {
+      console.error('Error generando Excel:', error);
+      this.isExporting = false;
+      this.mostrarMensajeError('Error al generar el archivo Excel');
+    }
   }
   
   get mesasEnInstitucion(): Array<{mesa: string, cantidad: number}> {

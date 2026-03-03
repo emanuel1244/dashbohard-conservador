@@ -64,12 +64,37 @@ export class ReporteVisualService {
 
   /**
    * Normalizar lugar de votación (manejar vacíos como "Sin asignar")
+   * Elimina espacios extras, normaliza el formato y corrige palabras pegadas
    */
   private normalizarLugar(lugar: string | null | undefined): string {
     if (!lugar || lugar.trim() === '') {
       return 'Sin asignar';
     }
-    return lugar.trim();
+    
+    let normalizado = lugar.trim().toUpperCase();
+    
+    // Corregir palabras comunes que aparecen pegadas
+    const correcciones: { [key: string]: string } = {
+      'MARIAAUXILIADORA': 'MARIA AUXILIADORA',
+      'FRANCISCODEPAULA': 'FRANCISCO DE PAULA',
+      'VILLAOLIMPICA': 'VILLA OLIMPICA',
+      'MEGACOLEGIO': 'MEGACOLEGIO',
+      'SEDEPRINCIPAL': 'SEDE PRINCIPAL',
+      'SEDE2': 'SEDE 2',
+      'SEDE3': 'SEDE 3',
+      'SEDE1': 'SEDE 1'
+    };
+    
+    // Aplicar correcciones
+    Object.keys(correcciones).forEach(incorrecto => {
+      const regex = new RegExp(incorrecto, 'g');
+      normalizado = normalizado.replace(regex, correcciones[incorrecto]);
+    });
+    
+    // Eliminar múltiples espacios consecutivos
+    normalizado = normalizado.replace(/\s+/g, ' ').trim();
+    
+    return normalizado;
   }
 
   /**
